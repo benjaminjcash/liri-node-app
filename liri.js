@@ -1,6 +1,12 @@
 var fs = require('fs');
 var inquirer = require('inquirer');
+var request = require('request');
+var Twitter = require('twitter');
+var twitterKeys = require('./twitterkeys.js');
+var Spotify = require('node-spotify-api');
+var spotifyKeys = require('./spotifykeys.js');
 
+//initiates siri. Askes user what they want to do, processes response.
 inquirer.prompt([
     {
         type: "list",
@@ -23,7 +29,7 @@ inquirer.prompt([
                 short: "Search the Open Movie Database!"
             },
             {
-                name: "do-what-it-says",
+                name: "random-song",
                 value: "random",
                 short: "I hope you like suprises!"
             }
@@ -41,20 +47,18 @@ inquirer.prompt([
             searchOmdb();
             break
         case "random":
+            randomSong();
             break
     }
 })
 
 //sends request to Twitter API and returns latest tweets.
 function getTweets() {
-    var Twitter = require('twitter');
-    // var twitterKeys = require('./keys.js');
-
     var client = new Twitter({
-        consumer_key: 'vcAItYM6mje0GMbUQdYkKTLCf',
-        consumer_secret: 'ZzJ10y9kSrnsmNB6GrqeCl00Zz4RbjWPrDPk1Lx3EnFCXquGJT',
-        access_token_key: '960337225828392960-aBPkL8YJvbBOA4VdKWTkTPjM4UXN9oB',
-        access_token_secret: 'YJTANCCO2pZLAhI3yyim0g59eDNLS8HHvTBqNQvalQUgW'
+        consumer_key: twitterKeys.consumer_key,
+        consumer_secret: twitterKeys.consumer_secret,
+        access_token_key: twitterKeys.access_token_key,
+        access_token_secret: twitterKeys.access_token_secret
     });
 
     var params = { screen_name: 'cash_bmoney' };
@@ -73,7 +77,6 @@ function getTweets() {
 
 //asks for user to input song information, then sends request to Spotify API and displays song data.
 function searchSpotify() {
-    var Spotify = require('node-spotify-api');
     inquirer.prompt([
         {
             type: "input",
@@ -86,8 +89,8 @@ function searchSpotify() {
             query = "The Sign Ace of Base"
         }
         var spotify = new Spotify({
-            id: '6a64f24b939b40a7aa70bd260e2d2c53',
-            secret: 'c0a8a40a74944b1c942614bcda20e6ff'
+            id: spotifyKeys.id,
+            secret: spotifyKeys.secret
         });
         spotify.search({ type: "track", query: query }, function (error, data) {
             if(error) {
@@ -114,7 +117,6 @@ function searchSpotify() {
 
 //asks for user to input movie information, then sends request to omdb and displays movie data.
 function searchOmdb() {
-    var request = require('request');
     inquirer.prompt([
         {
             type: "input",
@@ -155,6 +157,38 @@ function searchOmdb() {
     })
 }
 
+//reads random.txt and search Spotify with resulting text.
+function randomSong() {
+    fs.readFile("random.txt", "utf8", function(error, text) {
+        if (error) {
+            return console.log(error);
+        }
+        var spotify = new Spotify({
+            id: spotifyKeys.id,
+            secret: spotifyKeys.secret
+        });
+        spotify.search({ type: "track", query: text }, function (error, data) {
+            if (error) {
+                console.log(error)
+            } else {
+                var title = data.tracks.items[0].name;
+                var artist = data.tracks.items[0].artists[0].name;
+                var album = data.tracks.items[0].album.name;
+                var previewLink = data.tracks.items[0].preview_url;
+                if (!previewLink) {
+                    previewLink = "No preview available :("
+                }
+                console.log("~Siri~ Here is some information about a random song I chose!")
+                console.log("...");
+                console.log("Title: " + title);
+                console.log("Artist: " + artist);
+                console.log("Album: " + album);
+                console.log("Preview: " + previewLink);
+                console.log("...");
+            }
+        })
+    })
+}
 
 
 
