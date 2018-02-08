@@ -48,13 +48,13 @@ inquirer.prompt([
 //sends request to Twitter API and returns latest tweets.
 function getTweets() {
     var Twitter = require('twitter');
-    var twitterKeys = require('./keys.js');
+    // var twitterKeys = require('./keys.js');
 
     var client = new Twitter({
-        consumer_key: twitterKeys.consumer_key,
-        consumer_secret: twitterKeys.consumer_secret,
-        access_token_key: twitterKeys.access_token_key,
-        access_token_secret: twitterKeys.access_token_secret
+        consumer_key: 'vcAItYM6mje0GMbUQdYkKTLCf',
+        consumer_secret: 'ZzJ10y9kSrnsmNB6GrqeCl00Zz4RbjWPrDPk1Lx3EnFCXquGJT',
+        access_token_key: '960337225828392960-aBPkL8YJvbBOA4VdKWTkTPjM4UXN9oB',
+        access_token_secret: 'YJTANCCO2pZLAhI3yyim0g59eDNLS8HHvTBqNQvalQUgW'
     });
 
     var params = { screen_name: 'cash_bmoney' };
@@ -62,12 +62,16 @@ function getTweets() {
         if (error) {
             console.log(error);
         } else {
-            console.log(response);
+            console.log("~Siri~ Here are your latest Tweets!")
+            for(let i=0; i<tweets.length; i++) {
+                console.log("...")
+                console.log(tweets[i].text);
+            }
         }
     });
 }
 
-//asks for user to input song title, then sends request to Spotify API and displays song data.
+//asks for user to input song information, then sends request to Spotify API and displays song data.
 function searchSpotify() {
     var Spotify = require('node-spotify-api');
     inquirer.prompt([
@@ -108,6 +112,7 @@ function searchSpotify() {
     })
 }
 
+//asks for user to input movie information, then sends request to omdb and displays movie data.
 function searchOmdb() {
     var request = require('request');
     inquirer.prompt([
@@ -125,7 +130,7 @@ function searchOmdb() {
         request(queryURL, function(error, response, body) {
             if(error) {
                 console.log(error)
-            }
+            }            
             var title = JSON.parse(body).Title;
             var year = JSON.parse(body).Year;
             var imdbRating = JSON.parse(body).Ratings[0].Value;
