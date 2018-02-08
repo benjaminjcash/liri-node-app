@@ -29,7 +29,7 @@ inquirer.prompt([
                 short: "Search the Open Movie Database!"
             },
             {
-                name: "random-song",
+                name: "do-what-it-says",
                 value: "random",
                 short: "I hope you like suprises!"
             }
@@ -47,7 +47,7 @@ inquirer.prompt([
             searchOmdb();
             break
         case "random":
-            randomSong();
+            randomFunction();
             break
     }
 })
@@ -157,36 +157,74 @@ function searchOmdb() {
     })
 }
 
-//reads random.txt and search Spotify with resulting text.
-function randomSong() {
-    fs.readFile("random.txt", "utf8", function(error, text) {
+//reads random.txt and initiates liri with the function and search term specified.
+function randomFunction() {
+    fs.readFile("random.txt", "utf8", function(error, data) {
         if (error) {
             return console.log(error);
         }
-        var spotify = new Spotify({
-            id: spotifyKeys.id,
-            secret: spotifyKeys.secret
-        });
-        spotify.search({ type: "track", query: text }, function (error, data) {
-            if (error) {
-                console.log(error)
-            } else {
-                var title = data.tracks.items[0].name;
-                var artist = data.tracks.items[0].artists[0].name;
-                var album = data.tracks.items[0].album.name;
-                var previewLink = data.tracks.items[0].preview_url;
-                if (!previewLink) {
-                    previewLink = "No preview available :("
-                }
-                console.log("~Siri~ Here is some information about a random song I chose!")
-                console.log("...");
-                console.log("Title: " + title);
-                console.log("Artist: " + artist);
-                console.log("Album: " + album);
-                console.log("Preview: " + previewLink);
-                console.log("...");
-            }
-        })
+        parsedArr = data.split(",");
+        //checks which function is specified (song, movie, or tweet) and takes the appropriate action, seraching with the specified song or movie.
+        switch (parsedArr[0]) {
+            case "tweet":
+                getTweets();
+                break
+            case "song":
+                var spotify = new Spotify({
+                    id: spotifyKeys.id,
+                    secret: spotifyKeys.secret
+                });
+                spotify.search({ type: "track", query: parsedArr[1] }, function (error, data) {
+                    if (error) {
+                        console.log(error)
+                    } else {
+                        var title = data.tracks.items[0].name;
+                        var artist = data.tracks.items[0].artists[0].name;
+                        var album = data.tracks.items[0].album.name;
+                        var previewLink = data.tracks.items[0].preview_url;
+                        if (!previewLink) {
+                            previewLink = "No preview available :("
+                        }
+                        console.log("~Siri~ Here is some information about " + title + ".")
+                        console.log("...");
+                        console.log("Title: " + title);
+                        console.log("Artist: " + artist);
+                        console.log("Album: " + album);
+                        console.log("Preview: " + previewLink);
+                        console.log("...");
+                    }
+                })
+                break
+            case "movie":
+                var queryURL = "http://www.omdbapi.com/?t=" + parsedArr[1] + "&y=&plot=short&apikey=trilogy";
+                request(queryURL, function (error, response, body) {
+                    if (error) {
+                        console.log(error)
+                    }
+                    var title = JSON.parse(body).Title;
+                    var year = JSON.parse(body).Year;
+                    var imdbRating = JSON.parse(body).Ratings[0].Value;
+                    var rottenRating = JSON.parse(body).Ratings[1].Value;
+                    var country = JSON.parse(body).Country;
+                    var language = JSON.parse(body).Language;
+                    var plot = JSON.parse(body).Plot;
+                    var actors = JSON.parse(body).Actors;
+
+                    console.log("~Siri~ Here is some information about " + title + "")
+                    console.log("...");
+                    console.log("Title: " + title);
+                    console.log("Year: " + year);
+                    console.log("imdb Rating: " + imdbRating);
+                    console.log("Rotten Tomatoes Rating: " + rottenRating);
+                    console.log("Country: " + country);
+                    console.log("Language: " + language);
+                    console.log("Plot: " + plot);
+                    console.log("Actors: " + actors);
+                    console.log("...");
+                })
+                break
+        }
+
     })
 }
 
