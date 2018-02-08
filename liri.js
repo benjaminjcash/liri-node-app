@@ -39,6 +39,7 @@ inquirer.prompt([
     switch (input.initial) {
         case "twitter":
             getTweets();
+            logData("Obtained Tweets");
             break
         case "spotify":
             searchSpotify();
@@ -110,8 +111,10 @@ function searchSpotify() {
                 console.log("Album: " + album);
                 console.log("Preview: " + previewLink); 
                 console.log("...");
+                logData("Searched Spotify for " + title + " by " + artist);
             }
         })
+        
     })
 }
 
@@ -153,6 +156,7 @@ function searchOmdb() {
             console.log("Plot: " + plot);
             console.log("Actors: " + actors);
             console.log("...");
+            logData("Searched Imdb for " + title);
         })
     })
 }
@@ -225,6 +229,15 @@ function randomFunction() {
                 break
         }
 
+    })
+}
+
+//appends data to log.txt
+function logData(entry) {
+    fs.appendFile("log.txt", entry + "\n", function(error) {
+        if(error) {
+            console.log(error);
+        }
     })
 }
 
