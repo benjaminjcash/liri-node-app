@@ -20,7 +20,7 @@ inquirer.prompt([
             {
                 name: "movie-this",
                 value: "omdb",
-                short: "Search the Online Movie Database!"
+                short: "Search the Open Movie Database!"
             },
             {
                 name: "do-what-it-says",
@@ -96,10 +96,13 @@ function searchSpotify() {
                 if(!previewLink) {
                     previewLink = "No preview available :("
                 }
+                console.log("~Siri~ Here is some information about " + title + ".")
+                console.log("...");
                 console.log("Title: " + title);
                 console.log("Artist: " + artist);
                 console.log("Album: " + album);
                 console.log("Preview: " + previewLink); 
+                console.log("...");
             }
         })
     })
@@ -111,10 +114,39 @@ function searchOmdb() {
         {
             type: "input",
             name: "query",
-            message: "Search Omdb:"
+            message: "Search Imdb:"
         }
     ]).then(function (input) {
-        console.log(input.query)
+        var query = input.query
+        if(query == "") {
+            query = "Mr. Nobody"
+        }
+        var queryURL = "http://www.omdbapi.com/?t=" + query + "&y=&plot=short&apikey=trilogy";
+        request(queryURL, function(error, response, body) {
+            if(error) {
+                console.log(error)
+            }
+            var title = JSON.parse(body).Title;
+            var year = JSON.parse(body).Year;
+            var imdbRating = JSON.parse(body).Ratings[0].Value;
+            var rottenRating = JSON.parse(body).Ratings[1].Value;
+            var country = JSON.parse(body).Country;
+            var language = JSON.parse(body).Language;
+            var plot = JSON.parse(body).Plot;
+            var actors = JSON.parse(body).Actors;
+
+            console.log("~Siri~ Here is some information about " + title + "")
+            console.log("...");
+            console.log("Title: " + title);
+            console.log("Year: " + year);
+            console.log("imdb Rating: " + imdbRating);
+            console.log("Rotten Tomatoes Rating: " + rottenRating);
+            console.log("Country: " + country);
+            console.log("Language: " + language);
+            console.log("Plot: " + plot);
+            console.log("Actors: " + actors);
+            console.log("...");
+        })
     })
 }
 
